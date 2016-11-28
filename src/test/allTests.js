@@ -8,12 +8,12 @@ import assert from 'yeoman-assert';
 import helpers from 'yeoman-test';
 
 const OPTS = {
-  projectName: 'test project',
+  projectName: 'fh-test',
   description: 'this is a test project',
   githubName: 'thekelvinliu',
   buildDir: 'custom_dir'
 };
-const NAME = 'test-project';
+const NAME = 'fh-test';
 
 describe('allTests', () => {
   before(done => {
@@ -37,12 +37,16 @@ describe('allTests', () => {
         'Gruntfile.js',
         'package.json',
         'src/app.js',
-        'src/config.js',
-        'src/controllers/index.js',
-        'src/controllers/extras.js',
+        'config/dev.json',
         'src/helpers/logger.js',
-        'src/models/index.js',
-        'src/models/movie.js'
+        'src/helpers/validation.js',
+        'src/endpoints/http/index.js',
+        'src/endpoints/http/error.js',
+        'src/endpoints/http/sys.js',
+        'scripts/install.sh',
+        'scripts/postinstall.sh',
+        'scripts/fh-test-launcher.sh',
+        'scripts/fh-test'
       ]);
     });
   });
@@ -51,12 +55,10 @@ describe('allTests', () => {
     it('have no templating syntax', () => {
       assert.noFileContent([
         ['.gitignore', '<%= '],
-        ['Gruntfile.js', '<%= '],
         ['LICENSE', '<%= '],
         ['package.json', '<%= '],
         ['README.md', '<%= '],
-        ['README.md', '<%- '],
-        ['src/controllers/index.js', '<%= ']
+        ['README.md', '<%- ']
       ]);
     });
 
@@ -65,8 +67,7 @@ describe('allTests', () => {
         ['.gitignore', OPTS.buildDir],
         ['LICENSE', OPTS.githubName],
         ['README.md', `# ${NAME}`],
-        ['README.md', OPTS.description],
-        ['src/controllers/index.js', `title: '${NAME}'`]
+        ['README.md', OPTS.description]
       ]);
       assert.jsonFileContent('package.json', {
         name: NAME,

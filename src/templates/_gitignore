@@ -27,3 +27,4 @@ plato
 conf-docker.json
 *.swp
 lib/
+<%= buildDir%>
