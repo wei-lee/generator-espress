@@ -1,0 +1,18 @@
+
+{
+  "port":9000,
+  "logger": {
+    "name": "logger",
+    "streams": [{
+      "type": "stream",
+      "src": true,
+      "level": "trace",
+      "stream": "process.stdout"
+    }, {
+      "type": "raw",
+      "src": true,
+      "level": "trace",
+      "stream": "ringBuffer"
+    }]
+  }
+}

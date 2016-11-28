@@ -2,10 +2,11 @@
 
 import path from 'path';
 import { Base } from 'yeoman-generator';
-import mkdirp from 'mkdirp';
+//import mkdirp from 'mkdirp';
 import pathExists from 'path-exists';
 import simpleGit from 'simple-git';
 import slug from 'slug';
+import fs from 'fs';
 
 class MyGenerator extends Base {
   constructor(...args) {
@@ -78,94 +79,65 @@ class MyGenerator extends Base {
           this.destinationPath('README.md'),
           this.opts
         );
-        this.fs.copyTpl(
-          this.templatePath('_bower.json'),
-          this.destinationPath('bower.json'),
-          this.opts
-        );
-        this.fs.copyTpl(
-          this.templatePath('_gulpfile.babel.js'),
-          this.destinationPath('gulpfile.babel.js'),
-          this.opts
+        this.fs.copy(
+          this.templatePath('Gruntfile.js'),
+          this.destinationPath('Gruntfile.js'),
         );
         this.fs.copyTpl(
           this.templatePath('_package.json'),
           this.destinationPath('package.json'),
           this.opts
         );
+        this.fs.copyTpl(
+          this.templatePath('_sonar-project.properties'),
+          this.destinationPath('sonar-project.properties'),
+          this.opts
+        );
       },
       // express app config and files
       app() {
         // app.js and config.js
-        this.fs.copy(
-          this.templatePath('src/app.js'),
-          this.destinationPath('src/app.js')
-        );
-        this.fs.copy(
-          this.templatePath('src/config.js'),
-          this.destinationPath('src/config.js')
-        );
-        // controllers
         this.fs.copyTpl(
-          this.templatePath('src/app/controllers/_index.js'),
-          this.destinationPath('src/app/controllers/index.js'),
+          this.templatePath('src/app/_app.js'),
+          this.destinationPath('src/app.js'),
           this.opts
         );
         this.fs.copy(
-          this.templatePath('src/app/controllers/extras.js'),
-          this.destinationPath('src/app/controllers/extras.js')
-        );
-        // helpers
-        this.directory(
-          this.templatePath('src/app/helpers'),
-          this.destinationPath('src/app/helpers')
+          this.templatePath('src/app/config/dev.json'),
+          this.destinationPath('config/dev.json')
         );
         // models
         this.directory(
-          this.templatePath('src/app/models'),
-          this.destinationPath('src/app/models')
+          this.templatePath('src/app/endpoints'),
+          this.destinationPath('src/endpoints')
         );
-        // views
-        this.fs.copyTpl(
-          this.templatePath('src/app/views/layout/_base.jade'),
-          this.destinationPath('src/app/views/layout/base.jade'),
-          this.opts
-        );
-        this.fs.copy(
-          this.templatePath('src/app/views/error.jade'),
-          this.destinationPath('src/app/views/error.jade')
-        );
-        this.fs.copy(
-          this.templatePath('src/app/views/extras.jade'),
-          this.destinationPath('src/app/views/extras.jade')
-        );
-        this.fs.copy(
-          this.templatePath('src/app/views/index.jade'),
-          this.destinationPath('src/app/views/index.jade')
-        );
-        this.fs.copy(
-          this.templatePath('src/app/views/movies.jade'),
-          this.destinationPath('src/app/views/movies.jade')
+        this.directory(
+          this.templatePath('src/app/helpers'),
+          this.destinationPath('src/helpers')
         );
       },
-      // remaining source files
-      src() {
-        mkdirp(path.join(this.destinationRoot(), 'src/files'));
-        this.directory(
-          this.templatePath('src/fonts'),
-          this.destinationPath('src/fonts')
+      //install upstart scripts
+      scripts() {
+        let projectName = this.opts.projectName;
+        this.fs.copyTpl(
+          this.templatePath('scripts/_install.sh'),
+          this.destinationPath('scripts/install.sh'),
+          this.opts
         );
-        this.directory(
-          this.templatePath('src/images'),
-          this.destinationPath('src/images')
+        this.fs.copyTpl(
+          this.templatePath('scripts/_postinstall.sh'),
+          this.destinationPath('scripts/postinstall.sh'),
+          this.opts
         );
-        this.directory(
-          this.templatePath('src/scripts'),
-          this.destinationPath('src/scripts')
+        this.fs.copyTpl(
+          this.templatePath('scripts/_launcher.sh'),
+          this.destinationPath('scripts/'+ projectName +'-launcher.sh'),
+          this.opts
         );
-        this.directory(
-          this.templatePath('src/styles'),
-          this.destinationPath('src/styles')
+        this.fs.copyTpl(
+          this.templatePath('scripts/_service.sh'),
+          this.destinationPath('scripts/' + projectName),
+          this.opts
         );
       },
       // create local git and commit all files
@@ -179,6 +151,11 @@ class MyGenerator extends Base {
   }
 
   install() {
+    let projectName = this.opts.projectName;
+    fs.chmodSync(this.destinationPath('scripts/install.sh'), '0755');
+    fs.chmodSync(this.destinationPath('scripts/postinstall.sh'), '0755');
+    fs.chmodSync(this.destinationPath('scripts/'+ projectName +'-launcher.sh'), '0755');
+    fs.chmodSync(this.destinationPath('scripts/' + projectName), '0755');
     this.installDependencies();
   }
 

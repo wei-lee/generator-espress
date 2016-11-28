@@ -1,14 +1,29 @@
-'use strict';
+import fh_logger from 'fh-logger';
+var logger;
 
-import winston from 'winston';
+function setLogger(logr) {
+  logger = logr;
+}
 
-export default new winston.Logger({
-  transports: [
-    new winston.transports.Console({
-      level: (process.env.NODE_ENV === 'production') ? 'info' : 'debug',
-      timestamp: true,
-      stderrLevels: ['error'],
-      colorize: true
-    })
-  ]
-});
+// If logger hasn't been previously set (which can happen in the tests for example),
+// default to a very basic bunyan logger.
+// If the tests need a better logger they can create on in setUp as required..
+function getLogger() {
+  if (logger) {
+    return logger;
+  }
+
+  logger = fh_logger.createLogger({
+    name: 'default-logger',
+    streams: [
+      {
+        "type": "stream",
+        "level": "error",
+        "stream": "process.stdout"
+      }
+    ]
+  });
+  return logger;
+}
+
+export { getLogger, setLogger };
