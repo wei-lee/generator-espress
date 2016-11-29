@@ -111,9 +111,13 @@ class MyGenerator extends Base {
           this.templatePath('src/app/endpoints'),
           this.destinationPath('src/endpoints')
         );
-        this.directory(
-          this.templatePath('src/app/helpers'),
-          this.destinationPath('src/helpers')
+        this.fs.copy(
+          this.templatePath('src/app/logger.js'),
+          this.destinationPath('src/logger.js')
+        );
+        this.fs.copy(
+          this.templatePath('src/app/config/validation.js'),
+          this.destinationPath('config/validation.js')
         );
       },
       //install upstart scripts

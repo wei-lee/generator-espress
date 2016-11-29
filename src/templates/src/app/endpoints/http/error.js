@@ -1,4 +1,4 @@
-import getLogger from '../../helpers/logger';
+import getLogger from '../../logger';
 
 export default function errorHandler(err, req, res, next) {
   let logger = getLogger();
