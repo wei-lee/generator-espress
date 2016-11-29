@@ -14,8 +14,8 @@ import path from 'path';
 import fs from 'fs';
 import buildEndpoints from './endpoints/http';
 import errorHandler from './endpoints/http/error.js';
-import {getLogger, setLogger} from './helpers/logger';
-import validation from './helpers/validation';
+import {getLogger, setLogger} from './logger';
+import validation from '../config/validation';
 
 
 var TITLE = "<%= projectName %>";
