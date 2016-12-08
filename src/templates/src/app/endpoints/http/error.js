@@ -1,28 +1,26 @@
-import getLogger from '../../logger';
-
 export default function errorHandler(err, req, res, next) {
-  let logger = getLogger();
   var responseData;
+
+  // Log the error however you please
+  req.log.error({err: err, res: res, req: req}, "errorHandler");
+
   if (err.name === 'JsonSchemaValidation') {
+    // logs "express-jsonschema: Invalid data found"
 
-    // Log the error however you please 
-    logger.error(err.message);
-    // logs "express-jsonschema: Invalid data found" 
-
-    // Set a bad request http response status 
+    // Set a bad request http response status
     res.status(400);
 
-    // Format the response body 
+    // Format the response body
     responseData = {
       statusText: 'Bad Request',
       jsonSchemaValidation: true,
-      validations: err.validations // All of your validation information 
+      validations: err.validations // All of your validation information
     };
 
     res.json(responseData);
 
   } else {
-    // pass error to next error middleware handler 
+    // pass error to next error middleware handler
     if (err instanceof Error) {
       var error = {};
 
@@ -36,4 +34,4 @@ export default function errorHandler(err, req, res, next) {
     }
     return res.status(err.code || 500).json(err);
   }
-};
+}

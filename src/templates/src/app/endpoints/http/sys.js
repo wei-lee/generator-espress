@@ -3,7 +3,7 @@ export function sysPingEndpoint(server) {
     res.send("Ok");
   }
   server.get("/sys/info/ping", endpoint);
-};
+}
 
 export function sysHealthEndpoint(server) {
   function endpoint(req, res, next) {

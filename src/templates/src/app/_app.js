@@ -1,7 +1,6 @@
 'use strict';
 
 import bodyParser from 'body-parser';
-import cookieParser from 'cookie-parser';
 import express from 'express';
 import fhconfig from 'fh-config';
 import cors from 'cors';
@@ -14,7 +13,7 @@ import path from 'path';
 import fs from 'fs';
 import buildEndpoints from './endpoints/http';
 import errorHandler from './endpoints/http/error.js';
-import {getLogger, setLogger} from './logger';
+import {setLogger} from './logger';
 import validation from '../config/validation';
 
 
@@ -29,7 +28,7 @@ if (!process.env.conf_file) {
  */
 function usage() {
   /* eslint-disable no-console */
-  console.log("Usage: " + args.$0 + " <config file> [-d] (debug) --master-only --workers=[int] \n --master-only will override  --workers so should not be used together");
+  console.log(`Usage: ${args.$0} <config file> [-d] (debug) --master-only --workers=[int] \n --master-only will override  --workers so should not be used together`);
   /* eslint-enable no-console */
   process.exit(0);
 }
@@ -40,9 +39,9 @@ if (args.h || args._.length < 1) {
 
 /**
  * Initialise the configuration object.
- * @return {Promise} 
+ * @return {Promise}
  */
-function setupConfig(){
+function setupConfig() {
   return new Promise((resolve, reject) => {
     fhconfig.init(process.env.conf_file, validation, function(err) {
       if (err) {
@@ -59,10 +58,10 @@ function setupConfig(){
  * @param  {fhconfig} fhconfig The fhconfig instance
  * @return {object}   a logger
  */
-function setupLogger(fhconfig){
-   let logger = fhlogger.createLogger(fhconfig.getConfig().rawConfig.logger);
-   setLogger(logger);
-   return logger;
+function setupLogger(fhconfig) {
+  const logger = fhlogger.createLogger(fhconfig.getConfig().rawConfig.logger);
+  setLogger(logger);
+  return logger;
 }
 
 /**
@@ -72,7 +71,7 @@ function setupLogger(fhconfig){
  */
 function setupUncaughtExceptionHandler(logger) {
   // handle uncaught exceptions
-  process.on('uncaughtException', (err) => {
+  process.on('uncaughtException', err => {
     logger.error(`FATAL: UncaughtException, please report: ${util.inspect(err)}`);
     /* eslint-disable no-console */
     console.error(`${new Date().toString()} FATAL: UncaughtException, please report: ${util.inspect(err)}`);
@@ -88,32 +87,12 @@ function setupUncaughtExceptionHandler(logger) {
 }
 
 /**
- * Setup the handler to reload configuration when "SIGUSR2" is received.
- * @param  {[type]} fhconfig [description]
- * @return {[type]}          [description]
- */
-function setupFhconfigReloadHandler(fhconfig) {
-  process.on(fhconfig.RELOAD_CONFIG_SIGNAL, () => {
-    fhconfig.reload(cluster.workers, (err) => {
-      if (err) {
-        /* eslint-disable no-console */
-        console.error("Config not reloaded");
-        console.error(err);
-        console.error("Please fix and try again!!");
-        /* eslint-enable no-console */
-      }
-    });
-  });
-}
-
-/**
  * Start a single worker
  * @param  {logger}   logger   a logger instance
  * @param  {fhconfig} fhconfig a fhconfig instance
  */
-function startWorker(logger, fhconfig){
+function startWorker(logger, fhconfig) {
   setupUncaughtExceptionHandler(logger);
-  setupFhconfigReloadHandler(fhconfig);
   startApp(logger, fhconfig);
 }
 
@@ -122,19 +101,19 @@ function startWorker(logger, fhconfig){
  * @param  {logger}   logger   a logger instance
  * @param  {fhconfig} fhconfig a fhconfig instance
  */
-function startApp(logger, fhconfig){
-  let app = express();
+function startApp(logger, fhconfig) {
+  const app = express();
   app.use(logger.requestIdMiddleware);
      // Enable CORS for all requests
   app.use(cors());
 
   // Request logging
-  app.use(bunyanLogger({ logger: logger, parseUA: false }));
+  app.use(bunyanLogger({ logger: logger, parseUA: false, genReqId: req => req.header(logger.requestIdHeader) }));
 
   // Parse JSON payloads
   app.use(bodyParser.json({limit: fhconfig.value('fhmbaas.maxpayloadsize') || "20mb"}));
 
-  // wire up endpoints 
+  // wire up endpoints
   buildEndpoints(app);
 
   //error handler
@@ -151,26 +130,26 @@ function startApp(logger, fhconfig){
 }
 
 
-function main(){
+function main() {
   setupConfig()
-  .then((config) => {
-    let logger = setupLogger(fhconfig);
+  .then(config => {
+    const logger = setupLogger(fhconfig);
     return {logger, config};
   })
-  .then((param) => {
+  .then(param => {
     if (args.d === true || args["master-only"] === true) {
       /* eslint-disable no-console */
       console.log("starting single master process");
       /* eslint-enable no-console */
       startWorker(param.logger, param.config);
-    }else{
+    } else {
       var numWorkers = args["workers"];
-      fhcluster(function(){
+      fhcluster(function() {
         startWorker(param.logger, param.config);
       }, numWorkers);
     }
   })
-  .catch((err) => {
+  .catch(err => {
     /* eslint-disable no-console */
     console.error("error on startup ", err);
     /* eslint-enable no-console */
