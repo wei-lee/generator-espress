@@ -37,7 +37,7 @@ class MyGenerator extends Base {
       type: 'input',
       name: 'buildDir',
       message: 'Enter the name of your build directory:',
-      default: 'build'
+      default: 'lib'
     }];
     this.prompt(prompts, res => {
       this.opts.projectName = slug(res.projectName);
